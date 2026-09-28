@@ -2,3 +2,4 @@
 __pycache__/
 *.py[cod]
 aegis_model.pkl
+.env
