@@ -14,6 +14,17 @@ MODEL_PATH = ROOT_DIR / "model" / "aegis_model.pkl"
 model = joblib.load(MODEL_PATH)
 
 app = Flask(__name__)
+FRONTEND_ORIGIN = "http://127.0.0.1:5500"
+
+
+@app.after_request
+def add_cors_headers(response):
+    if request.headers.get("Origin") == FRONTEND_ORIGIN:
+        response.headers["Access-Control-Allow-Origin"] = FRONTEND_ORIGIN
+        response.headers["Vary"] = "Origin"
+        response.headers["Access-Control-Allow-Methods"] = "POST, OPTIONS"
+        response.headers["Access-Control-Allow-Headers"] = "Content-Type"
+    return response
 
 URL_PATTERN = re.compile(
     r"""(?i)\b(?:https?://|www\.)[^\s<>'"]+"""
