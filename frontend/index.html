@@ -4,8 +4,8 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="theme-color" content="#080d19" />
-    <meta name="description" content="Check suspicious messages and links with Aegis." />
-    <title>Aegis — Message security check</title>
+    <meta name="description" content="Check suspicious messages and internship offers with Aegis." />
+    <title>Aegis — Scam warning checks</title>
     <link rel="stylesheet" href="styles.css" />
     <script src="app.js" defer></script>
   </head>
@@ -18,32 +18,44 @@
           </span>
           <span class="brand-name">aegis<span>.</span></span>
         </a>
-        <div class="topbar-note"><span class="live-dot"></span> PRIVATE MESSAGE CHECK</div>
+        <div class="topbar-note"><span class="live-dot"></span> TEXT-ONLY RISK CHECKS</div>
       </header>
 
       <main id="top">
         <section class="intro" aria-labelledby="page-title">
           <div class="eyebrow"><span class="eyebrow-line"></span> A LITTLE MORE CERTAINTY</div>
           <h1 id="page-title">Pause. Check.<br /><span>Then decide.</span></h1>
-          <p class="intro-copy">Got a message or link that feels off? Paste it below. Aegis checks for warning signs and explains what it finds.</p>
+          <p class="intro-copy">Check a suspicious message or internship offer. Aegis highlights warning signs so you can make a more informed decision.</p>
         </section>
 
-        <section class="workspace" aria-label="Message checker">
+        <section class="workspace" aria-label="Aegis text checker">
           <div class="checker-card">
             <div class="card-heading">
               <div>
-                <div class="section-kicker">MESSAGE CHECK</div>
+                <div class="section-kicker" id="mode-kicker">MESSAGE CHECK</div>
                 <h2>What would you like to check?</h2>
               </div>
               <span class="step-label"><span>01</span> / 02</span>
             </div>
 
+            <div class="mode-picker" role="group" aria-label="Choose what to check">
+              <button class="mode-button is-active" type="button" data-mode="message" aria-pressed="true">Message or link</button>
+              <button class="mode-button" type="button" data-mode="internship" aria-pressed="false">Internship offer</button>
+            </div>
+            <p class="mode-help" id="mode-help">Look for suspicious language and URL patterns in a message or link.</p>
+
+            <div class="input-wrap company-site-field" id="company-site-field" hidden>
+              <label for="company-website">Company website <span>(optional)</span></label>
+              <input id="company-website" name="company-website" type="url" maxlength="500" placeholder="https://company.example" autocomplete="url" />
+              <p class="field-note">Included with the offer text in the same warning check. This does not verify the company or search its website.</p>
+            </div>
+
             <form id="check-form">
-              <label class="sr-only" for="message">Suspicious message or URL</label>
+              <label class="sr-only" id="message-label" for="message">Suspicious message or URL</label>
               <div class="input-wrap">
                 <textarea id="message" name="message" maxlength="5000" placeholder="Paste a suspicious message or link here…" required></textarea>
                 <div class="input-footer">
-                  <span class="input-hint"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M8 1.5 13 3.5v3.4c0 3-2 5.2-5 6.4-3-1.2-5-3.4-5-6.4V3.5l5-2Z"/><path d="m5.8 7.7 1.4 1.4 3-3.1"/></svg> Your text is checked locally by this demo.</span>
+                  <span class="input-hint"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M8 1.5 13 3.5v3.4c0 3-2 5.2-5 6.4-3-1.2-5-3.4-5-6.4V3.5l5-2Z"/><path d="m5.8 7.7 1.4 1.4 3-3.1"/></svg> Checked by this demo’s local service.</span>
                   <span id="char-count" class="char-count">0 / 5000</span>
                 </div>
               </div>
@@ -65,15 +77,34 @@
               <span class="side-kicker">A SECOND LOOK</span>
             </div>
             <h2>See the signals.<br />Make your call.</h2>
-            <p class="side-copy">Aegis looks for patterns that can appear in scam messages, then shows you the reasons behind its assessment.</p>
+            <p class="side-copy">Aegis checks pasted text for warning signs, then shows you the reasons behind its assessment.</p>
             <div class="side-divider"></div>
             <div class="workflow">
-              <div class="workflow-step"><span class="workflow-number">01</span><span>Paste a message or URL</span><span class="workflow-check">✓</span></div>
+              <div class="workflow-step"><span class="workflow-number">01</span><span>Paste text or a link</span><span class="workflow-check">✓</span></div>
               <div class="workflow-step"><span class="workflow-number">02</span><span>Review the warning signs</span><span class="workflow-check">✓</span></div>
               <div class="workflow-step"><span class="workflow-number">03</span><span>Choose what to do next</span><span class="workflow-check">↗</span></div>
             </div>
-            <p class="disclaimer"><span aria-hidden="true">✳</span> Aegis offers a risk estimate, not a guarantee. When in doubt, verify through an official channel.</p>
+            <p class="disclaimer"><span aria-hidden="true">✳</span> The internship check does not verify employers or offers, search reviews or public records, or prove fraud or safety.</p>
           </aside>
+        </section>
+
+        <section class="stats-card" aria-labelledby="stats-title" aria-live="polite">
+          <div class="stats-heading">
+            <div>
+              <div class="section-kicker">YOUR LOCAL ACTIVITY</div>
+              <h2 id="stats-title">Checks made in this app</h2>
+            </div>
+            <div class="stats-controls">
+              <span class="stats-total" id="stats-total">0 checks</span>
+              <button class="reset-stats" id="reset-stats" type="button">Reset counts</button>
+            </div>
+          </div>
+          <p class="stats-note">Counts are saved in this browser. Pasted messages and offer text are not stored.</p>
+          <dl class="risk-stats">
+            <div class="risk-stat low-stat"><dt>Low</dt><dd id="stats-low">0</dd></div>
+            <div class="risk-stat medium-stat"><dt>Medium</dt><dd id="stats-medium">0</dd></div>
+            <div class="risk-stat high-stat"><dt>High</dt><dd id="stats-high">0</dd></div>
+          </dl>
         </section>
 
         <section id="result" class="result-card" aria-labelledby="result-title" hidden>
@@ -84,7 +115,7 @@
           <div class="result-grid">
             <div class="score-panel">
               <div class="score-ring" id="score-ring"><div class="score-inner"><strong id="score-value">0</strong><span>of 100</span></div></div>
-              <span class="score-caption">Estimated risk</span>
+              <span class="score-caption">Warning score</span>
             </div>
             <div class="findings-panel">
               <h3>Warning signs</h3>
@@ -92,7 +123,12 @@
               <p id="explanation" class="explanation"></p>
             </div>
           </div>
-          <div class="result-note"><span aria-hidden="true">i</span> A low score does not prove a message is safe. Verify requests using a trusted, official source.</div>
+          <div class="result-note"><span aria-hidden="true">i</span> Scores are heuristic warnings, not measured probabilities. A low score does not prove a message or offer is safe.</div>
+          <section id="source-research" class="source-research" aria-labelledby="source-title" hidden>
+            <h3 id="source-title">Source research</h3>
+            <p id="source-status" class="source-status"></p>
+            <ul id="source-list" class="source-list"></ul>
+          </section>
         </section>
 
         <footer class="footer"><span>AEGIS <span class="footer-dot">·</span> A STUDENT SECURITY PROJECT</span><span>Think before you tap.</span></footer>
