@@ -5,6 +5,7 @@ from urllib.parse import urlsplit
 
 import joblib
 from flask import Flask, jsonify, request
+from werkzeug.exceptions import BadRequest, RequestEntityTooLarge
 
 ROOT_DIR = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT_DIR))
@@ -15,6 +16,9 @@ MODEL_PATH = ROOT_DIR / "model" / "aegis_model.pkl"
 model = joblib.load(MODEL_PATH)
 
 app = Flask(__name__)
+MAX_TEXT_LENGTH = 5000
+MAX_REQUEST_BYTES = 64 * 1024
+app.config["MAX_CONTENT_LENGTH"] = MAX_REQUEST_BYTES
 FRONTEND_ORIGIN = "http://127.0.0.1:5500"
 # Exact official event hosts only; subdomains and suffix matches are excluded.
 VERIFIED_EVENT_HOSTS = frozenset({"quantumweek.tech", "www.quantumweek.tech"})
@@ -28,6 +32,60 @@ def add_cors_headers(response):
         response.headers["Access-Control-Allow-Methods"] = "POST, OPTIONS"
         response.headers["Access-Control-Allow-Headers"] = "Content-Type"
     return response
+
+
+def _input_error(message, status=400):
+    return jsonify({
+        "risk_score": 0,
+        "risk_level": "low",
+        "signals": [],
+        "explanation": message,
+    }), status
+
+
+@app.errorhandler(RequestEntityTooLarge)
+def request_too_large(_error):
+    return _input_error(
+        f"Request body is too large. Keep it under {MAX_REQUEST_BYTES // 1024} KB.",
+        413,
+    )
+
+
+def _read_text_payload(*, internship=False):
+    context = (
+        " This check analyzes only pasted offer text; it does not verify the "
+        "company or search reviews or public records."
+        if internship else ""
+    )
+
+    def invalid(message, status=400):
+        return None, _input_error(message + context, status)
+
+    if not request.is_json:
+        return invalid("Content-Type must be application/json.")
+
+    try:
+        data = request.get_json()
+    except BadRequest:
+        return invalid("Request body contains malformed JSON.")
+
+    if not isinstance(data, dict):
+        return invalid("Request body must be a JSON object with a text field.")
+
+    if "text" not in data:
+        return invalid("Request JSON is missing the required text field.")
+
+    text = data["text"]
+    if not isinstance(text, str):
+        return invalid("The text field must be a string.")
+
+    if not text.strip():
+        return invalid("The text field must not be empty.")
+
+    if len(text) > MAX_TEXT_LENGTH:
+        return invalid(f"Text is too long. Maximum length is {MAX_TEXT_LENGTH} characters.")
+
+    return text, None
 
 URL_PATTERN = re.compile(
     r"""(?i)\b(?:https?://|www\.)[^\s<>'"]+"""
@@ -54,10 +112,21 @@ def check_lookalike_domain(text):
 
 
 def find_first_url(text):
-    match = URL_PATTERN.search(text)
-    if not match:
-        return None
-    return match.group(0).rstrip(".,!?;:)]}")
+    for match in URL_PATTERN.finditer(text):
+        candidate = match.group(0).rstrip(".,!?;:)]}")
+        parsed_candidate = candidate if "://" in candidate else f"//{candidate}"
+        try:
+            parsed = urlsplit(parsed_candidate)
+            hostname = parsed.hostname
+            # Accessing .port validates malformed or out-of-range ports.
+            parsed.port
+        except (ValueError, UnicodeError):
+            continue
+
+        if hostname and parsed.scheme.lower() in {"", "http", "https"}:
+            return candidate
+
+    return None
 
 
 def is_verified_event_host(url):
@@ -135,17 +204,10 @@ def make_result(text):
 
 @app.post("/check")
 def check():
-    data = request.get_json(silent=True)
-
-    if not isinstance(data, dict) or not isinstance(data.get("text"), str):
-        return jsonify({
-            "risk_score": 0,
-            "risk_level": "low",
-            "signals": [],
-            "explanation": "Please send JSON with a string field named text.",
-        }), 400
-
-    return jsonify(make_result(data["text"]))
+    text, error = _read_text_payload()
+    if error:
+        return error
+    return jsonify(make_result(text))
 
 
 # Internship-offer checks deliberately use only the submitted text. They do not
@@ -289,20 +351,10 @@ def make_internship_result(text):
 
 @app.post("/check/internship")
 def check_internship():
-    data = request.get_json(silent=True)
-    if not isinstance(data, dict) or not isinstance(data.get("text"), str) or not data["text"].strip():
-        return jsonify({
-            "risk_score": 0,
-            "risk_level": "low",
-            "signals": [],
-            "explanation": (
-                "Please send JSON with a non-empty string field named text. "
-                "This check analyzes only pasted offer text and does not verify "
-                "the company or search reviews or public records."
-            ),
-        }), 400
-
-    return jsonify(make_internship_result(data["text"]))
+    text, error = _read_text_payload(internship=True)
+    if error:
+        return error
+    return jsonify(make_internship_result(text))
 
 
 if __name__ == "__main__":
