@@ -36,7 +36,7 @@ const modeCopy = {
     pending: "Checking message text locally…",
   },
   internship: {
-    endpoint: "/check",
+    endpoint: "/check/internship",
     kicker: "INTERNSHIP OFFER CHECK",
     label: "Internship offer text",
     placeholder: "Paste the internship offer text here…",
@@ -264,6 +264,14 @@ form.addEventListener("submit", async (event) => {
     }
   }
 
+  const requestText = companyWebsite
+    ? `${text}\n\nCompany website: ${companyWebsite}`
+    : text;
+  if (requestText.length > 5000) {
+    setResultState("error", "Offer text and company website together must be 5,000 characters or fewer.");
+    return;
+  }
+
   submitButton.disabled = true;
   modeButtons.forEach((button) => { button.disabled = true; });
   messageInput.disabled = true;
@@ -280,11 +288,7 @@ form.addEventListener("submit", async (event) => {
     const response = await fetch(`${API_BASE}${modeCopy[activeMode].endpoint}`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        text: activeMode === "internship" && companyWebsiteInput.value.trim()
-          ? `${text}\n\nCompany website: ${companyWebsite}`
-          : text,
-      }),
+      body: JSON.stringify({ text: requestText }),
     });
     let data;
     try {
