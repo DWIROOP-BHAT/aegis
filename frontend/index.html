@@ -46,14 +46,14 @@
 
             <div class="input-wrap company-site-field" id="company-site-field" hidden>
               <label for="company-website">Company website <span>(optional)</span></label>
-              <input id="company-website" name="company-website" type="url" maxlength="500" placeholder="https://company.example" autocomplete="url" />
-              <p class="field-note">Included with the offer text in the same warning check. This does not verify the company or search its website.</p>
+              <input id="company-website" name="company-website" type="url" maxlength="500" placeholder="https://company.example" autocomplete="url" aria-describedby="company-website-note" />
+              <p class="field-note" id="company-website-note">Included with the offer text in the same warning check. This does not verify the company or search its website.</p>
             </div>
 
             <form id="check-form">
               <label class="sr-only" id="message-label" for="message">Suspicious message or URL</label>
               <div class="input-wrap">
-                <textarea id="message" name="message" maxlength="5000" placeholder="Paste a suspicious message or link here…" required></textarea>
+              <textarea id="message" name="message" maxlength="5000" placeholder="Paste a suspicious message or link here…" aria-describedby="mode-help char-count" required></textarea>
                 <div class="input-footer">
                   <span class="input-hint"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M8 1.5 13 3.5v3.4c0 3-2 5.2-5 6.4-3-1.2-5-3.4-5-6.4V3.5l5-2Z"/><path d="m5.8 7.7 1.4 1.4 3-3.1"/></svg> Checked by this demo’s local service.</span>
                   <span id="char-count" class="char-count">0 / 5000</span>
@@ -107,7 +107,12 @@
           </dl>
         </section>
 
-        <section id="result" class="result-card" aria-labelledby="result-title" hidden>
+        <section id="result-state" class="result-state" data-state="empty" role="status" aria-live="polite" aria-atomic="true">
+          <span class="state-indicator" aria-hidden="true"></span>
+          <p id="result-state-message">Your result will appear here after you run a check.</p>
+        </section>
+
+        <section id="result" class="result-card" aria-labelledby="result-title" aria-busy="false" hidden>
           <div class="result-heading">
             <div><div class="section-kicker">CHECK COMPLETE</div><h2 id="result-title">Here’s what Aegis found</h2></div>
             <span id="result-level" class="risk-pill">LOW RISK</span>

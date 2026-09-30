@@ -1,0 +1,174 @@
+{
+  "artifact": "model/research/phiusiil_no_https_rf.pkl",
+  "artifact_sha256": "6F7F45AA8FE3D96EAD926CDBA3973E728B1CB458AF421C93999DE32CF457607F",
+  "dataset": "PhiUSIIL Phishing URL (Website), UCI dataset 967",
+  "dataset_sha256": "A236549CD369CD80BD478FF8E1779CBF44C58D5C3F79F7A51A1ADBED7D06D1C6",
+  "license_attribution": "CC BY 4.0; Prasad & Chandra (2024), UCI dataset 967, DOI 10.1016/j.cose.2023.103545",
+  "rows_after_deduplication": 231783,
+  "deduplication": {
+    "input_rows": 235795,
+    "rows_after_null_and_blank_filter": 235795,
+    "invalid_url_rows": 0,
+    "exact_duplicate_rows_removed": 1127,
+    "exact_conflicting_label_rows_dropped": 2,
+    "near_duplicate_rows_removed": 2883,
+    "near_conflicting_label_rows_dropped": 0,
+    "rows_after_all_deduplication": 231783,
+    "near_duplicate_threshold": 0.95,
+    "minhash_permutations": 64,
+    "minhash_seed": 42
+  },
+  "class_mapping": {
+    "0": "legitimate",
+    "1": "phishing"
+  },
+  "model": "RandomForestClassifier (HTTPS feature ablation)",
+  "parameters": {
+    "bootstrap": true,
+    "ccp_alpha": 0.0,
+    "class_weight": "balanced",
+    "criterion": "gini",
+    "max_depth": null,
+    "max_features": "sqrt",
+    "max_leaf_nodes": null,
+    "max_samples": null,
+    "min_impurity_decrease": 0.0,
+    "min_samples_leaf": 2,
+    "min_samples_split": 2,
+    "min_weight_fraction_leaf": 0.0,
+    "monotonic_cst": null,
+    "n_estimators": 300,
+    "n_jobs": -1,
+    "oob_score": false,
+    "random_state": 42,
+    "verbose": 0,
+    "warm_start": false
+  },
+  "feature_order": [
+    "url_length",
+    "dot_count",
+    "has_ip_address",
+    "has_at_symbol",
+    "hyphen_count",
+    "host_length",
+    "path_length",
+    "path_depth",
+    "query_length",
+    "query_param_count",
+    "tld_length",
+    "subdomain_count",
+    "digit_count",
+    "digit_ratio",
+    "letter_count",
+    "letter_ratio",
+    "underscore_count",
+    "percent_count",
+    "ampersand_count",
+    "equals_count",
+    "question_count",
+    "has_nondefault_port",
+    "has_fragment"
+  ],
+  "decision_threshold_candidate": 0.5,
+  "feature_importance_gini": [
+    {
+      "feature": "host_length",
+      "importance": 0.30900114093938197
+    },
+    {
+      "feature": "path_length",
+      "importance": 0.20394401454990413
+    },
+    {
+      "feature": "url_length",
+      "importance": 0.08259643090973397
+    },
+    {
+      "feature": "digit_ratio",
+      "importance": 0.08221891657086938
+    },
+    {
+      "feature": "digit_count",
+      "importance": 0.07237309636048427
+    },
+    {
+      "feature": "letter_count",
+      "importance": 0.05451508113540857
+    },
+    {
+      "feature": "letter_ratio",
+      "importance": 0.05197597903090012
+    },
+    {
+      "feature": "subdomain_count",
+      "importance": 0.04869081681738586
+    },
+    {
+      "feature": "dot_count",
+      "importance": 0.027044041642970435
+    },
+    {
+      "feature": "path_depth",
+      "importance": 0.02653012444813725
+    },
+    {
+      "feature": "hyphen_count",
+      "importance": 0.019395066241024987
+    },
+    {
+      "feature": "tld_length",
+      "importance": 0.019172407652200293
+    },
+    {
+      "feature": "query_param_count",
+      "importance": 0.0009607868517172975
+    },
+    {
+      "feature": "query_length",
+      "importance": 0.0008328856517783544
+    },
+    {
+      "feature": "equals_count",
+      "importance": 0.0005071231676480053
+    },
+    {
+      "feature": "underscore_count",
+      "importance": 0.00010642220959831397
+    },
+    {
+      "feature": "has_at_symbol",
+      "importance": 8.131681857420109E-05
+    },
+    {
+      "feature": "has_fragment",
+      "importance": 3.7744214806991364E-05
+    },
+    {
+      "feature": "has_ip_address",
+      "importance": 8.233350812000948E-06
+    },
+    {
+      "feature": "percent_count",
+      "importance": 4.116030469103993E-06
+    },
+    {
+      "feature": "ampersand_count",
+      "importance": 3.6602890642316763E-06
+    },
+    {
+      "feature": "question_count",
+      "importance": 5.95113563570587E-07
+    },
+    {
+      "feature": "has_nondefault_port",
+      "importance": 3.5666089055018687E-12
+    }
+  ],
+  "runtime": {
+    "python": "3.12.14 (main, Aug 25 2026, 14:01:42) [MSC v.1944 64 bit (AMD64)]",
+    "scikit_learn": "1.9.1",
+    "pandas": "3.0.6",
+    "numpy": "2.5.3"
+  },
+  "disclaimer": "Published in this V2 test folder at the project team's request with dataset attribution. Exploratory, PhiUSIIL-specific evaluation only; an evaluation fold was inspected during model iteration, and independent real-world validation is still required."
+}

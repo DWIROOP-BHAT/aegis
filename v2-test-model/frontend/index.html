@@ -1,0 +1,143 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#080d19" />
+    <meta name="description" content="Check suspicious messages and internship offers with Aegis." />
+    <title>Aegis — Scam warning checks</title>
+    <link rel="stylesheet" href="styles.css" />
+    <script src="app.js" defer></script>
+  </head>
+  <body>
+    <div class="shell">
+      <header class="topbar">
+        <a class="brand" href="#top" aria-label="Aegis home">
+          <span class="brand-mark" aria-hidden="true">
+            <svg viewBox="0 0 32 32" fill="none"><path d="M16 3.5 27 8v7.4c0 6.2-4.3 10.8-11 13.1C9.3 26.2 5 21.6 5 15.4V8l11-4.5Z" stroke="currentColor" stroke-width="1.7"/><path d="m11.8 15.8 2.8 2.8 5.8-6.1" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </span>
+          <span class="brand-name">aegis<span>.</span></span>
+        </a>
+        <div class="topbar-note"><span class="live-dot"></span> TEXT-ONLY RISK CHECKS</div>
+      </header>
+
+      <main id="top">
+        <section class="intro" aria-labelledby="page-title">
+          <div class="eyebrow"><span class="eyebrow-line"></span> A LITTLE MORE CERTAINTY</div>
+          <h1 id="page-title">Pause. Check.<br /><span>Then decide.</span></h1>
+          <p class="intro-copy">Check a suspicious message or internship offer. Aegis highlights warning signs so you can make a more informed decision.</p>
+        </section>
+
+        <section class="workspace" aria-label="Aegis text checker">
+          <div class="checker-card">
+            <div class="card-heading">
+              <div>
+                <div class="section-kicker" id="mode-kicker">MESSAGE CHECK</div>
+                <h2>What would you like to check?</h2>
+              </div>
+              <span class="step-label"><span>01</span> / 02</span>
+            </div>
+
+            <div class="mode-picker" role="group" aria-label="Choose what to check">
+              <button class="mode-button is-active" type="button" data-mode="message" aria-pressed="true">Message or link</button>
+              <button class="mode-button" type="button" data-mode="internship" aria-pressed="false">Internship offer</button>
+            </div>
+            <p class="mode-help" id="mode-help">Look for suspicious language and URL patterns in a message or link.</p>
+
+            <div class="input-wrap company-site-field" id="company-site-field" hidden>
+              <label for="company-website">Company website <span>(optional)</span></label>
+              <input id="company-website" name="company-website" type="url" maxlength="500" placeholder="https://company.example" autocomplete="url" aria-describedby="company-website-note" />
+              <p class="field-note" id="company-website-note">Included with the offer text in the same warning check. This does not verify the company or search its website.</p>
+            </div>
+
+            <form id="check-form">
+              <label class="sr-only" id="message-label" for="message">Suspicious message or URL</label>
+              <div class="input-wrap">
+              <textarea id="message" name="message" maxlength="5000" placeholder="Paste a suspicious message or link here…" aria-describedby="mode-help char-count" required></textarea>
+                <div class="input-footer">
+                  <span class="input-hint"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M8 1.5 13 3.5v3.4c0 3-2 5.2-5 6.4-3-1.2-5-3.4-5-6.4V3.5l5-2Z"/><path d="m5.8 7.7 1.4 1.4 3-3.1"/></svg> Checked by this demo’s local service.</span>
+                  <span id="char-count" class="char-count">0 / 5000</span>
+                </div>
+              </div>
+              <div class="form-actions">
+                <button class="text-button" id="sample-button" type="button">Try a sample <span aria-hidden="true">↗</span></button>
+                <div class="primary-actions">
+                  <button class="clear-button" id="clear-button" type="button" disabled>Clear</button>
+                  <button class="analyze-button" id="submit-button" type="submit"><span class="button-label">Analyze message</span><span class="button-arrow" aria-hidden="true">→</span></button>
+                </div>
+              </div>
+            </form>
+
+            <p id="status" class="status" role="status" aria-live="polite"></p>
+          </div>
+
+          <aside class="side-panel" aria-label="How Aegis works">
+            <div class="side-top">
+              <span class="side-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><path d="M12 3 21 7v5.7c0 5.1-3.6 8.9-9 10.8-5.4-1.9-9-5.7-9-10.8V7l9-4Z" stroke="currentColor" stroke-width="1.5"/><path d="m8.5 12.2 2.3 2.3 4.8-5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+              <span class="side-kicker">A SECOND LOOK</span>
+            </div>
+            <h2>See the signals.<br />Make your call.</h2>
+            <p class="side-copy">Aegis checks pasted text for warning signs, then shows you the reasons behind its assessment.</p>
+            <div class="side-divider"></div>
+            <div class="workflow">
+              <div class="workflow-step"><span class="workflow-number">01</span><span>Paste text or a link</span><span class="workflow-check">✓</span></div>
+              <div class="workflow-step"><span class="workflow-number">02</span><span>Review the warning signs</span><span class="workflow-check">✓</span></div>
+              <div class="workflow-step"><span class="workflow-number">03</span><span>Choose what to do next</span><span class="workflow-check">↗</span></div>
+            </div>
+            <p class="disclaimer"><span aria-hidden="true">✳</span> The internship check does not verify employers or offers, search reviews or public records, or prove fraud or safety.</p>
+          </aside>
+        </section>
+
+        <section class="stats-card" aria-labelledby="stats-title" aria-live="polite">
+          <div class="stats-heading">
+            <div>
+              <div class="section-kicker">YOUR LOCAL ACTIVITY</div>
+              <h2 id="stats-title">Checks made in this app</h2>
+            </div>
+            <div class="stats-controls">
+              <span class="stats-total" id="stats-total">0 checks</span>
+              <button class="reset-stats" id="reset-stats" type="button">Reset counts</button>
+            </div>
+          </div>
+          <p class="stats-note">Counts are saved in this browser. Pasted messages and offer text are not stored.</p>
+          <dl class="risk-stats">
+            <div class="risk-stat low-stat"><dt>Low</dt><dd id="stats-low">0</dd></div>
+            <div class="risk-stat medium-stat"><dt>Medium</dt><dd id="stats-medium">0</dd></div>
+            <div class="risk-stat high-stat"><dt>High</dt><dd id="stats-high">0</dd></div>
+          </dl>
+        </section>
+
+        <section id="result-state" class="result-state" data-state="empty" role="status" aria-live="polite" aria-atomic="true">
+          <span class="state-indicator" aria-hidden="true"></span>
+          <p id="result-state-message">Your result will appear here after you run a check.</p>
+        </section>
+
+        <section id="result" class="result-card" aria-labelledby="result-title" aria-busy="false" hidden>
+          <div class="result-heading">
+            <div><div class="section-kicker">CHECK COMPLETE</div><h2 id="result-title">Here’s what Aegis found</h2></div>
+            <span id="result-level" class="risk-pill">LOW RISK</span>
+          </div>
+          <div class="result-grid">
+            <div class="score-panel">
+              <div class="score-ring" id="score-ring"><div class="score-inner"><strong id="score-value">0</strong><span>of 100</span></div></div>
+              <span class="score-caption">Warning score</span>
+            </div>
+            <div class="findings-panel">
+              <h3>Warning signs</h3>
+              <ul id="signals-list" class="signals-list"></ul>
+              <p id="explanation" class="explanation"></p>
+            </div>
+          </div>
+          <div class="result-note"><span aria-hidden="true">i</span> Scores are heuristic warnings, not measured probabilities. A low score does not prove a message or offer is safe.</div>
+          <section id="source-research" class="source-research" aria-labelledby="source-title" hidden>
+            <h3 id="source-title">Source research</h3>
+            <p id="source-status" class="source-status"></p>
+            <ul id="source-list" class="source-list"></ul>
+          </section>
+        </section>
+
+        <footer class="footer"><span>AEGIS <span class="footer-dot">·</span> A STUDENT SECURITY PROJECT</span><span>Think before you tap.</span></footer>
+      </main>
+    </div>
+  </body>
+</html>
