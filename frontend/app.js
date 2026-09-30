@@ -6,6 +6,8 @@ const submitButton = document.querySelector("#submit-button");
 const clearButton = document.querySelector("#clear-button");
 const sampleButton = document.querySelector("#sample-button");
 const status = document.querySelector("#status");
+const resultState = document.querySelector("#result-state");
+const resultStateMessage = document.querySelector("#result-state-message");
 const resultCard = document.querySelector("#result");
 const modeButtons = [...document.querySelectorAll(".mode-button")];
 const modeKicker = document.querySelector("#mode-kicker");
@@ -34,7 +36,7 @@ const modeCopy = {
     pending: "Checking message text locally…",
   },
   internship: {
-    endpoint: "/check/internship",
+    endpoint: "/check",
     kicker: "INTERNSHIP OFFER CHECK",
     label: "Internship offer text",
     placeholder: "Paste the internship offer text here…",
@@ -113,6 +115,21 @@ function setMode(mode) {
   buttonLabel.textContent = copy.submit;
   status.textContent = "";
   resultCard.hidden = true;
+  showEmptyState();
+}
+
+function setResultState(state, message) {
+  resultState.dataset.state = state;
+  resultStateMessage.textContent = message;
+  resultState.hidden = false;
+  resultState.setAttribute("role", state === "error" ? "alert" : "status");
+  resultState.setAttribute("aria-live", state === "error" ? "assertive" : "polite");
+  resultState.setAttribute("aria-busy", String(state === "loading"));
+  if (state !== "empty") resultState.scrollIntoView({ behavior: "smooth", block: "nearest" });
+}
+
+function showEmptyState() {
+  setResultState("empty", "Your result will appear here after you run a check.");
 }
 
 function showResult(data) {
@@ -149,6 +166,8 @@ function showResult(data) {
   document.querySelector("#explanation").textContent = String(data.explanation || "No explanation was returned.");
   renderSourceResearch(data, activeMode);
   resultCard.hidden = false;
+  resultCard.setAttribute("aria-busy", "false");
+  resultState.hidden = true;
   resultCard.scrollIntoView({ behavior: "smooth", block: "nearest" });
 }
 
@@ -198,6 +217,8 @@ function renderSourceResearch(data, mode) {
 messageInput.addEventListener("input", () => {
   updateInputState();
   status.textContent = "";
+  resultCard.hidden = true;
+  showEmptyState();
 });
 
 modeButtons.forEach((button) => {
@@ -208,6 +229,8 @@ sampleButton.addEventListener("click", () => {
   messageInput.value = modeCopy[activeMode].sample;
   updateInputState();
   status.textContent = "";
+  resultCard.hidden = true;
+  showEmptyState();
   messageInput.focus();
 });
 
@@ -216,6 +239,7 @@ clearButton.addEventListener("click", () => {
   updateInputState();
   status.textContent = "";
   resultCard.hidden = true;
+  showEmptyState();
   messageInput.focus();
 });
 
@@ -242,8 +266,15 @@ form.addEventListener("submit", async (event) => {
 
   submitButton.disabled = true;
   modeButtons.forEach((button) => { button.disabled = true; });
+  messageInput.disabled = true;
+  companyWebsiteInput.disabled = true;
+  clearButton.disabled = true;
+  sampleButton.disabled = true;
   buttonLabel.textContent = "Checking…";
-  status.textContent = modeCopy[activeMode].pending;
+  status.textContent = "";
+  resultCard.hidden = true;
+  resultCard.setAttribute("aria-busy", "true");
+  setResultState("loading", modeCopy[activeMode].pending);
 
   try {
     const response = await fetch(`${API_BASE}${modeCopy[activeMode].endpoint}`, {
@@ -255,25 +286,38 @@ form.addEventListener("submit", async (event) => {
           : text,
       }),
     });
-    const data = await response.json();
-    if (!response.ok) {
-      throw new Error(data.explanation || `The checker returned an error (${response.status}).`);
+    let data;
+    try {
+      data = await response.json();
+    } catch {
+      data = {};
     }
-    if (typeof data.risk_score !== "number" || typeof data.risk_level !== "string") {
-      throw new Error("The checker returned a response Aegis could not understand.");
+    if (!response.ok) {
+      throw new Error(typeof data?.explanation === "string" && data.explanation.trim()
+        ? data.explanation
+        : `The checker could not complete this request (error ${response.status}). Please try again.`);
+    }
+    if (!data || typeof data !== "object" || typeof data.risk_score !== "number" || typeof data.risk_level !== "string") {
+      throw new Error("The checker returned an incomplete response. Please try again.");
     }
     status.textContent = "";
     const normalizedLevel = String(data.risk_level).toLowerCase();
     recordCheck(["low", "medium", "high"].includes(normalizedLevel) ? normalizedLevel : "low");
     showResult(data);
   } catch (error) {
-    status.textContent = error instanceof TypeError
+    const message = error instanceof TypeError
       ? "Could not reach the checker. Make sure the backend is running at 127.0.0.1:5000."
       : error.message;
+    setResultState("error", `${message} You can edit the text and try again.`);
   } finally {
     submitButton.disabled = false;
     modeButtons.forEach((button) => { button.disabled = false; });
+    messageInput.disabled = false;
+    companyWebsiteInput.disabled = false;
+    sampleButton.disabled = false;
     buttonLabel.textContent = modeCopy[activeMode].submit;
+    updateInputState();
+    resultCard.setAttribute("aria-busy", "false");
   }
 });
 
