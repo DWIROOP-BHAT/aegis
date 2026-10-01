@@ -1,9 +1,9 @@
 # Aegis V2 test model
 
-This folder is a self-contained test copy of the current Aegis frontend and a
-backend connected to two local experimental models: URL phishing-pattern
-scoring and English SMS spam-vs-ham scoring. The existing project files remain
-separate. This is a V2 test package, not the later fast-track/main model.
+This folder is a self-contained V2 test package connected to two local
+experimental models: URL phishing-pattern scoring and English SMS
+spam-vs-ham scoring. The existing project files remain separate. This is a
+test package, not the later fast-track/main model.
 
 ## What it checks
 
@@ -20,12 +20,97 @@ separate. This is a V2 test package, not the later fast-track/main model.
 The API retains `risk_score`, `risk_level`, `signals`, and `explanation`, and
 adds `component_scores` and `score_note`. The single score is the largest of
 separate experimental signals; it is **not** a calibrated probability of
-fraud, safety, or genuineness. The current frontend does not yet display the
-individual component scores.
+fraud, safety, or genuineness.
+
+## Backend API contract
+
+### `POST /check`
+
+This endpoint checks pasted message text and, when it finds a parseable URL,
+the URL string. It does not open the link, inspect its page, check DNS or
+certificates, follow redirects, or query outside services.
+
+Request header: `Content-Type: application/json`
+
+Request JSON:
+
+```json
+{
+  "text": "message or URL string"
+}
+```
+
+`text` is required, must be a non-empty string, and can contain at most 5,000
+characters. The complete request body must be at most 64 KB. Unknown JSON
+fields are ignored.
+
+Successful response JSON:
+
+```json
+{
+  "risk_score": 0,
+  "risk_level": "low",
+  "signals": [],
+  "explanation": "...",
+  "component_scores": {
+    "rule_warnings": {"score": 0, "scope": "..."},
+    "url_phishing": {"score": null, "scope": "..."},
+    "message_spam": {"score": 0, "scope": "..."}
+  },
+  "score_note": "..."
+}
+```
+
+- `risk_score`: integer from 0 to 100; the largest available component score.
+- `risk_level`: `low` below 40, `medium` from 40 through 69, `high` from 70
+  through 100.
+- `signals`: array of plain-English warning labels.
+- `explanation`: plain-English result and model-scope limits.
+- `component_scores`: objects named `rule_warnings`, `url_phishing`, and
+  `message_spam`, each with a `score` and `scope`. Scores are integers from 0
+  to 100; `url_phishing.score` is `null` when no valid URL string is scored.
+- `score_note`: says how the scores are combined and what the models do not
+  establish.
+
+All values are experimental model or rule scores. The URL model scores
+URL-string patterns only; it never fetches or inspects a site. The text model
+is for English SMS spam-vs-ham only. Neither model proves that anything is safe
+or fraudulent, and the combined score is not a calibrated probability.
+
+Invalid requests return JSON with an `error` code and an `explanation`, plus an
+appropriate HTTP status:
+
+- `400`: malformed JSON, a non-object JSON body, missing `text`, a non-string
+  value, or blank text.
+- `413`: text over 5,000 characters or a request body over 64 KB.
+- `415`: request does not use a JSON content type.
+- `500`: an unexpected inference failure; details are available in the backend
+  terminal, not returned to the caller.
+- `404`: unknown endpoint; the error explains the two supported paths.
+- `503`: one or both required model artifacts could not be loaded.
+
+Malformed URL candidates are skipped by URL scoring rather than being allowed
+to crash the request. The text model and warning rules can still evaluate the
+message. When the URL model is not run, `component_scores.url_phishing.score`
+is `null`.
+
+### `GET /health`
+
+Returns `status` and a `models` object with a `loaded` boolean and artifact name
+for `url_phishing` and `message_spam`. It returns HTTP 200 when both artifacts
+load and pass basic interface checks, or HTTP 503 otherwise. This endpoint
+checks local artifact availability; it does not measure model accuracy.
+
+This V2 backend supports `/check` and `/health` only. It does not provide
+internship-offer verification, source research, live URL inspection, or
+threat-intelligence lookups. The copied frontend currently has an internship
+mode that calls `/check/internship`; that route is not part of this package.
+For the V2 demo, the frontend should use `/check` for message-and-URL input and
+should not present internship verification as a V2 capability.
 
 ## Run locally on Windows
 
-Open two PowerShell terminals. In the first:
+Open two PowerShell terminals from this folder. In the first:
 
 ```powershell
 cd path\to\aegis\v2-test-model
@@ -42,9 +127,28 @@ cd path\to\aegis\v2-test-model
 python -m http.server 5500 --directory frontend
 ```
 
-Open <http://127.0.0.1:5500>. Keep the backend terminal running at
-<http://127.0.0.1:5000>. The backend allows the local frontend origin
+Open <http://127.0.0.1:5500>. Keep the backend terminal running. Check model
+availability at <http://127.0.0.1:5000/health>; the backend root path `/` is
+not a web page. The backend allows the local frontend origin
 `http://127.0.0.1:5500`.
+
+## Manual smoke-check checklist
+
+1. Start the backend and confirm `GET http://127.0.0.1:5000/health` returns
+   HTTP 200 with both model `loaded` values set to `true`.
+2. Start the frontend and submit a normal-looking message without a URL. Check
+   that `/check` returns all six documented fields and that
+   `component_scores.url_phishing.score` is `null`.
+3. Submit a message with an HTTPS URL and urgency wording. Check that the
+   response includes URL, text, and rule component scores where applicable,
+   and that the explanation names the limited model scopes.
+4. Send malformed JSON and confirm HTTP 400 with JSON `error` and
+   `explanation` fields.
+5. Send a string longer than 5,000 characters, then a body larger than 64 KB;
+   confirm each gets HTTP 413 and a clear JSON explanation.
+6. From the frontend at `http://127.0.0.1:5500`, confirm the browser request to
+   `/check` succeeds. Do not demo the inherited internship mode as supported by
+   this backend.
 
 ## Evaluation summary
 
