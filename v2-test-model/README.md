@@ -195,3 +195,6 @@ Attribution 4.0 International (CC BY 4.0).
 
 The datasets' CC BY 4.0 attributions are included with the model metadata. See
 `model/research/ATTRIBUTION.md` for the model-to-dataset mapping and limitations.
+Dataset licenses do not by themselves establish a separate license for these
+trained model artifacts. Confirm model-weight redistribution terms before
+merging or distributing them.
