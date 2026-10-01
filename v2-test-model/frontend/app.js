@@ -109,6 +109,7 @@ function showResult(data) {
     signalsList.append(item);
   }
   document.querySelector("#explanation").textContent = String(data.explanation || "No explanation was returned.");
+  renderComponentScore("rule_warnings", data.component_scores?.rule_warnings, "#rule-score-value", "#rule-score-scope");
   renderComponentScore("url_phishing", data.component_scores?.url_phishing, "#url-score-value", "#url-score-scope");
   renderComponentScore("message_spam", data.component_scores?.message_spam, "#message-score-value", "#message-score-scope");
   const scoreNote = String(data.score_note || "Scores are separate experimental estimates, not calibrated probabilities. A low score does not prove a message is safe.");
@@ -194,9 +195,10 @@ form.addEventListener("submit", async (event) => {
       data = {};
     }
     if (!response.ok) {
-      throw new Error(typeof data?.explanation === "string" && data.explanation.trim()
-        ? data.explanation
-        : `The checker could not complete this request (error ${response.status}). Please try again.`);
+      const details = [...new Set([data?.explanation, data?.error]
+        .filter((value) => typeof value === "string" && value.trim())
+        .map((value) => value.trim()))].join(" ");
+      throw new Error(details || `The checker could not complete this request (error ${response.status}). Please try again.`);
     }
     if (!data || typeof data !== "object" || typeof data.risk_score !== "number" || typeof data.risk_level !== "string") {
       throw new Error("The checker returned an incomplete response. Please try again.");

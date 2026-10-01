@@ -108,7 +108,7 @@ textarea::placeholder { color: #69778d; }
 .explanation { margin: 12px 0 0; color: var(--muted); font-size: 12px; line-height: 1.7; }
 .component-scores { margin-top: 20px; padding-top: 16px; border-top: 1px solid var(--line); }
 .component-scores h3 { margin-bottom: 11px; font: 600 13px 'Manrope', sans-serif; }
-.component-score-list { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 11px; margin: 0; }
+.component-score-list { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 11px; margin: 0; }
 .component-score { min-width: 0; padding: 13px 14px; border: 1px solid rgba(164,183,209,.13); border-radius: 9px; background: rgba(5,10,19,.25); }
 .component-score dt { color: var(--soft); font-size: 11px; }
 .component-score dd { margin: 7px 0; color: var(--mint); font: 600 17px 'Manrope', sans-serif; }
