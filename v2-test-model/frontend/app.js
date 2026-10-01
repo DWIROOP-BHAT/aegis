@@ -9,45 +9,10 @@ const status = document.querySelector("#status");
 const resultState = document.querySelector("#result-state");
 const resultStateMessage = document.querySelector("#result-state-message");
 const resultCard = document.querySelector("#result");
-const modeButtons = [...document.querySelectorAll(".mode-button")];
-const modeKicker = document.querySelector("#mode-kicker");
-const modeHelp = document.querySelector("#mode-help");
-const messageLabel = document.querySelector("#message-label");
-const companySiteField = document.querySelector("#company-site-field");
-const companyWebsiteInput = document.querySelector("#company-website");
 const buttonLabel = submitButton.querySelector(".button-label");
-const sourceResearch = document.querySelector("#source-research");
-const sourceStatus = document.querySelector("#source-status");
-const sourceList = document.querySelector("#source-list");
 const resetStatsButton = document.querySelector("#reset-stats");
 const sampleMessage = "URGENT: Your account will be suspended. Verify immediately at https://arnaz0n-login.example";
-const sampleInternship = "Congratulations! You are guaranteed job placement after this internship. Pay a refundable registration fee of ₹2,500 within the next 2 hours to secure your position.";
 const STATS_KEY = "aegis-check-counts-v1";
-const modeCopy = {
-  message: {
-    endpoint: "/check",
-    kicker: "MESSAGE CHECK",
-    label: "Suspicious message or URL",
-    placeholder: "Paste a suspicious message or link here…",
-    help: "Look for suspicious language and URL patterns in a message or link.",
-    sample: sampleMessage,
-    sampleButton: "Try a message sample",
-    submit: "Analyze message",
-    pending: "Checking message text locally…",
-  },
-  internship: {
-    endpoint: "/check/internship",
-    kicker: "INTERNSHIP OFFER CHECK",
-    label: "Internship offer text",
-    placeholder: "Paste the internship offer text here…",
-    help: "Checks the pasted offer text for selected warning signs. It does not verify the employer or search public sources.",
-    sample: sampleInternship,
-    sampleButton: "Try an offer sample",
-    submit: "Analyze offer",
-    pending: "Checking offer text locally…",
-  },
-};
-let activeMode = "message";
 let checkCounts = loadCheckCounts();
 
 function loadCheckCounts() {
@@ -98,26 +63,6 @@ function updateInputState() {
   clearButton.disabled = messageInput.value.length === 0;
 }
 
-function setMode(mode) {
-  activeMode = mode;
-  const copy = modeCopy[mode];
-  modeButtons.forEach((button) => {
-    const selected = button.dataset.mode === mode;
-    button.classList.toggle("is-active", selected);
-    button.setAttribute("aria-pressed", String(selected));
-  });
-  modeKicker.textContent = copy.kicker;
-  messageLabel.textContent = copy.label;
-  messageInput.placeholder = copy.placeholder;
-  modeHelp.textContent = copy.help;
-  companySiteField.hidden = mode !== "internship";
-  sampleButton.innerHTML = `${copy.sampleButton} <span aria-hidden="true">↗</span>`;
-  buttonLabel.textContent = copy.submit;
-  status.textContent = "";
-  resultCard.hidden = true;
-  showEmptyState();
-}
-
 function setResultState(state, message) {
   resultState.dataset.state = state;
   resultStateMessage.textContent = message;
@@ -164,54 +109,33 @@ function showResult(data) {
     signalsList.append(item);
   }
   document.querySelector("#explanation").textContent = String(data.explanation || "No explanation was returned.");
-  renderSourceResearch(data, activeMode);
+  renderComponentScore("rule_warnings", data.component_scores?.rule_warnings, "#rule-score-value", "#rule-score-scope");
+  renderComponentScore("url_phishing", data.component_scores?.url_phishing, "#url-score-value", "#url-score-scope");
+  renderComponentScore("message_spam", data.component_scores?.message_spam, "#message-score-value", "#message-score-scope");
+  const scoreNote = String(data.score_note || "Scores are separate experimental estimates, not calibrated probabilities. A low score does not prove a message is safe.");
+  document.querySelector("#score-note").textContent = scoreNote;
+  if (!/does not prove|not prove/i.test(scoreNote)) {
+    document.querySelector("#score-note").append(document.createTextNode(" A low score does not prove a message is safe."));
+  }
   resultCard.hidden = false;
   resultCard.setAttribute("aria-busy", "false");
   resultState.hidden = true;
   resultCard.scrollIntoView({ behavior: "smooth", block: "nearest" });
 }
 
-function renderSourceResearch(data, mode) {
-  sourceResearch.hidden = mode !== "internship";
-  sourceList.replaceChildren();
-  if (mode !== "internship") return;
-
-  const sources = Array.isArray(data.sources) ? data.sources : [];
-  if (sources.length === 0) {
-    sourceStatus.textContent = "Source research is not connected. This check has not searched official pages, reviews, or forums.";
-    return;
+function renderComponentScore(key, component, valueSelector, scopeSelector) {
+  const value = document.querySelector(valueSelector);
+  const scope = document.querySelector(scopeSelector);
+  if (key === "url_phishing" && (!component || component.score == null)) {
+    value.textContent = "No URL detected · not applicable";
+  } else if (component && typeof component.score === "number" && Number.isFinite(component.score)) {
+    value.textContent = `${Math.min(100, Math.max(0, component.score))} / 100`;
+  } else {
+    value.textContent = "Not returned";
   }
-
-  sourceStatus.textContent = "Sources are references to review, not proof that an offer is genuine or fraudulent.";
-  sources.forEach((source) => {
-    if (!source || typeof source !== "object") return;
-    const item = document.createElement("li");
-    const href = String(source.url || source.link || source.source_url || "");
-    const kind = [source.type, source.category, source.source_type, source.kind, href].join(" ").toLowerCase();
-    const isUserReport = /reddit|review|forum|user.?report/.test(kind);
-    const label = document.createElement("span");
-    label.className = "source-kind";
-    label.textContent = isUserReport ? "User report · anecdotal" : kind.includes("official") ? "Official source" : "Source";
-    item.append(label);
-
-    const title = String(source.title || "Untitled source");
-    if (/^https?:\/\//i.test(href)) {
-      const link = document.createElement("a");
-      link.href = href;
-      link.target = "_blank";
-      link.rel = "noopener noreferrer";
-      link.textContent = title;
-      item.append(link);
-    } else {
-      const titleText = document.createElement("span");
-      titleText.textContent = title;
-      item.append(titleText);
-    }
-    const date = document.createElement("time");
-    date.textContent = String(source.date || source.published_date || source.published_at || "Date not provided");
-    item.append(date);
-    sourceList.append(item);
-  });
+  if (component && typeof component.scope === "string" && component.scope.trim()) {
+    scope.textContent = component.scope;
+  }
 }
 
 messageInput.addEventListener("input", () => {
@@ -221,12 +145,8 @@ messageInput.addEventListener("input", () => {
   showEmptyState();
 });
 
-modeButtons.forEach((button) => {
-  button.addEventListener("click", () => setMode(button.dataset.mode));
-});
-
 sampleButton.addEventListener("click", () => {
-  messageInput.value = modeCopy[activeMode].sample;
+  messageInput.value = sampleMessage;
   updateInputState();
   status.textContent = "";
   resultCard.hidden = true;
@@ -252,43 +172,21 @@ form.addEventListener("submit", async (event) => {
     return;
   }
 
-  const companyWebsite = activeMode === "internship" ? companyWebsiteInput.value.trim() : "";
-  if (companyWebsite) {
-    try {
-      const parsedWebsite = new URL(companyWebsite);
-      if (!["http:", "https:"].includes(parsedWebsite.protocol)) throw new Error("Use an http or https company website URL.");
-    } catch {
-      status.textContent = "Enter a valid company website URL beginning with http:// or https://.";
-      companyWebsiteInput.focus();
-      return;
-    }
-  }
-
-  const requestText = companyWebsite
-    ? `${text}\n\nCompany website: ${companyWebsite}`
-    : text;
-  if (requestText.length > 5000) {
-    setResultState("error", "Offer text and company website together must be 5,000 characters or fewer.");
-    return;
-  }
-
   submitButton.disabled = true;
-  modeButtons.forEach((button) => { button.disabled = true; });
   messageInput.disabled = true;
-  companyWebsiteInput.disabled = true;
   clearButton.disabled = true;
   sampleButton.disabled = true;
   buttonLabel.textContent = "Checking…";
   status.textContent = "";
   resultCard.hidden = true;
   resultCard.setAttribute("aria-busy", "true");
-  setResultState("loading", modeCopy[activeMode].pending);
+  setResultState("loading", "Checking message text locally…");
 
   try {
-    const response = await fetch(`${API_BASE}${modeCopy[activeMode].endpoint}`, {
+    const response = await fetch(`${API_BASE}/check`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ text: requestText }),
+      body: JSON.stringify({ text }),
     });
     let data;
     try {
@@ -297,9 +195,10 @@ form.addEventListener("submit", async (event) => {
       data = {};
     }
     if (!response.ok) {
-      throw new Error(typeof data?.explanation === "string" && data.explanation.trim()
-        ? data.explanation
-        : `The checker could not complete this request (error ${response.status}). Please try again.`);
+      const details = [...new Set([data?.explanation, data?.error]
+        .filter((value) => typeof value === "string" && value.trim())
+        .map((value) => value.trim()))].join(" ");
+      throw new Error(details || `The checker could not complete this request (error ${response.status}). Please try again.`);
     }
     if (!data || typeof data !== "object" || typeof data.risk_score !== "number" || typeof data.risk_level !== "string") {
       throw new Error("The checker returned an incomplete response. Please try again.");
@@ -315,11 +214,9 @@ form.addEventListener("submit", async (event) => {
     setResultState("error", `${message} You can edit the text and try again.`);
   } finally {
     submitButton.disabled = false;
-    modeButtons.forEach((button) => { button.disabled = false; });
     messageInput.disabled = false;
-    companyWebsiteInput.disabled = false;
     sampleButton.disabled = false;
-    buttonLabel.textContent = modeCopy[activeMode].submit;
+    buttonLabel.textContent = "Analyze message";
     updateInputState();
     resultCard.setAttribute("aria-busy", "false");
   }
