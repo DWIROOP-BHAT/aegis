@@ -103,10 +103,9 @@ checks local artifact availability; it does not measure model accuracy.
 
 This V2 backend supports `/check` and `/health` only. It does not provide
 internship-offer verification, source research, live URL inspection, or
-threat-intelligence lookups. The copied frontend currently has an internship
-mode that calls `/check/internship`; that route is not part of this package.
-For the V2 demo, the frontend should use `/check` for message-and-URL input and
-should not present internship verification as a V2 capability.
+threat-intelligence lookups. The V2 frontend uses `/check` for message-and-URL
+input. Do not present internship verification or online research as V2
+capabilities.
 
 ## Run locally on Windows
 
@@ -147,8 +146,8 @@ not a web page. The backend allows the local frontend origin
 5. Send a string longer than 5,000 characters, then a body larger than 64 KB;
    confirm each gets HTTP 413 and a clear JSON explanation.
 6. From the frontend at `http://127.0.0.1:5500`, confirm the browser request to
-   `/check` succeeds. Do not demo the inherited internship mode as supported by
-   this backend.
+   `/check` succeeds and the rule, URL, and message component cards show the
+   returned values (the URL score may be not applicable for text-only input).
 
 ## Evaluation summary
 
