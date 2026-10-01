@@ -178,20 +178,22 @@ not a web page. The backend allows the local frontend origin
   scams.
 
 Detailed metadata and artifact hashes are in `model/research/`. No raw training
-datasets are included. Both model files are provided here for this V2 test
-package with the dataset attributions below.
+datasets are included. The model files are present in this V2 test package and
+were trained from the datasets identified below. The repository documents the
+source dataset licenses, but does not document a separate license for the
+trained artifacts.
 
 ## Dataset attribution
 
 **PhiUSIIL:** Prasad, A. & Chandra, S. (2024). *PhiUSIIL Phishing URL
 (Website)* [Dataset]. UCI Machine Learning Repository, dataset 967. DOI:
-<https://doi.org/10.1016/j.cose.2023.103545>. Dataset license: Creative
-Commons Attribution 4.0 International (CC BY 4.0).
+<https://doi.org/10.1016/j.cose.2023.103545>. [UCI dataset page](https://archive.ics.uci.edu/dataset/967/phiusiil%2Bphishing%2Burl%2Bwebsite%2Bdataset).
+Dataset license: [Creative Commons Attribution 4.0 International (CC BY 4.0)](https://creativecommons.org/licenses/by/4.0/).
 
 **SMS Spam Collection:** Almeida, T. & Hidalgo, J. (2011). *SMS Spam
 Collection* [Dataset]. UCI Machine Learning Repository, dataset 228. DOI:
-<https://doi.org/10.24432/C5CC84>. Dataset license: Creative Commons
-Attribution 4.0 International (CC BY 4.0).
+<https://doi.org/10.24432/C5CC84>. [UCI dataset page](https://archive.ics.uci.edu/dataset/228/sms%2Bspam%2Bcollection).
+Dataset license: [Creative Commons Attribution 4.0 International (CC BY 4.0)](https://creativecommons.org/licenses/by/4.0/).
 
 The datasets' CC BY 4.0 attributions are included with the model metadata. See
 `model/research/ATTRIBUTION.md` for the model-to-dataset mapping and limitations.
