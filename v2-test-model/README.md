@@ -200,3 +200,42 @@ The datasets' CC BY 4.0 attributions are included with the model metadata. See
 Dataset licenses do not by themselves establish a separate license for these
 trained model artifacts. Confirm model-weight redistribution terms before
 merging or distributing them.
+
+## Model artifact provenance
+
+The following records summarize what is documented for each included weight
+file. The dataset identifiers and hashes help identify the training data; they
+do not establish the weights' license or permission to redistribute them.
+
+### URL phishing model
+
+- **Artifact:** `model/research/phiusiil_no_https_rf.pkl`
+- **Artifact SHA-256:** `6F7F45AA8FE3D96EAD926CDBA3973E728B1CB458AF421C93999DE32CF457607F`
+- **Training dataset/version:** PhiUSIIL Phishing URL (Website), UCI dataset
+  967; dataset SHA-256 `A236549CD369CD80BD478FF8E1779CBF44C58D5C3F79F7A51A1ADBED7D06D1C6`.
+- **Recorded provenance:** trained on raw URL and label columns, with the
+  documented filtering and duplicate removal, leaving 231,783 rows. The
+  recorded estimator is a 300-tree Random Forest with the HTTPS feature
+  ablation and random seed 42. Details are in
+  `model/research/final_candidate_phiusiil_no_https_rf.json`; a training script
+  is not included in this V2 folder.
+
+### English SMS spam model
+
+- **Artifact:** `model/research/sms_spam_word_char_logreg.pkl`
+- **Artifact SHA-256:** `F7E83324A41652953406E169A194457EDBDD1354C22DEC747C19E69EB58ADD71`
+- **Training dataset/version:** SMS Spam Collection v.1, UCI dataset 228;
+  dataset ZIP SHA-256 `1587EA43E58E82B14FF1F5425C88E17F8496BFCDB67A583DBFF9EEFAF9963CE3`.
+- **Recorded provenance:** preprocessing and normalized-template grouping
+  produced 5,093 messages used for fitting. The selected model is word-and-
+  character TF-IDF with Logistic Regression (`C=2.0`, balanced classes,
+  `liblinear`, seed 42). Details are in
+  `model/research/sms_spam_metrics.json`; a training script is not included in
+  this V2 folder.
+
+**Artifact distribution status: unresolved.** The repository documents the
+source datasets' CC BY 4.0 terms, citations, and the recorded training
+provenance above. It does not confirm a separate license or redistribution
+permission for either trained artifact. Do not represent artifact distribution
+as approved until the model contributors confirm provenance and applicable
+terms for both files.
